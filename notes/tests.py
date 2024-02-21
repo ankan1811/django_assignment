@@ -7,13 +7,21 @@ from .serializers import NoteSerializer, NoteVersionHistorySerializer
 
 
 class NoteAPITestCase(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(
-            username='testuser', password='testpassword')
+    def test_registration(self):
+        data = {'username': 'testuser',
+                'email': 'test@example.com', 'password': 'testpassword'}
+        response = self.client.post('/signup/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_login(self):
+        data = {'username': 'testuser', 'password': 'testpassword'}
+        response = self.client.post('/login/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Ensure token is returned in the response
+        self.assertIn('token', response.data)
 
     def test_create_note(self):
-        self.client.force_login(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         data = {'title': 'Test Note', 'content': 'This is a test note.',
                 'owner': self.user.id, 'shared_with': []}
         response = self.client.post('/notes/create/', data, format='json')
@@ -22,6 +30,7 @@ class NoteAPITestCase(TestCase):
     def test_get_note(self):
         note = Note.objects.create(
             title='Test Note', content='This is a test note.', owner=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         response = self.client.get(f'/notes/{note.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -29,6 +38,7 @@ class NoteAPITestCase(TestCase):
         note = Note.objects.create(
             title='Test Note', content='This is a test note.', owner=self.user)
         data = {'users': []}  # Adjust as needed
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         response = self.client.post(
             f'/notes/share/{note.id}/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -38,6 +48,7 @@ class NoteAPITestCase(TestCase):
             title='Test Note', content='This is a test note.', owner=self.user)
         data = {'title': 'Updated Test Note',
                 'content': 'This is an updated test note.', 'owner': self.user.id, 'shared_with': []}
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         response = self.client.put(
             f'/notes/update/{note.id}/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -47,7 +58,6 @@ class NoteAPITestCase(TestCase):
             title='Test Note', content='This is a test note.', owner=self.user)
         NoteVersionHistory.objects.create(
             note=note, user=self.user, changes='First version')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         response = self.client.get(f'/notes/version-history/{note.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # Add more tests for other APIs as needed
