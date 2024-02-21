@@ -136,3 +136,15 @@ def share_note(request, id):
     note.shared_with.add(*users_to_share_with)
 
     return Response({'message': 'Note shared successfully'}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_note_version_history(request, id):
+    try:
+        note_history = NoteVersionHistory.objects.filter(note_id=id)
+        serializer = NoteVersionHistorySerializer(note_history, many=True)
+        return Response(serializer.data)
+    except NoteVersionHistory.DoesNotExist:
+        return Response({'error': 'Note version history not found'}, status=status.HTTP_404_NOT_FOUND)

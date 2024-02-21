@@ -11,5 +11,7 @@ urlpatterns = [
     path('notes/<int:id>/', views.get_note),
     path('notes/update/<int:id>/', views.update_note),
     path('notes/update/share/<int:id>/', views.share_note),
+    path('notes/version-history/<int:id>/',
+         views.get_note_version_history, name='get_note_version_history'),
     # Add other URL patterns for the remaining endpoints
 ]
