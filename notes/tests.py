@@ -19,11 +19,13 @@ class NoteAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Ensure token is returned in the response
         self.assertIn('token', response.data)
+        # Retrieve the token and set it as a property of the test case class
+        self.token = response.data['token']
 
     def test_create_note(self):
-        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         data = {'title': 'Test Note', 'content': 'This is a test note.',
                 'owner': self.user.id, 'shared_with': []}
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
         response = self.client.post('/notes/create/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 

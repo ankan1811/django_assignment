@@ -18,6 +18,8 @@ The base URL for all endpoints is: `http://127.0.0.1:8000/`
 
 ### 4. python manage.py runserver
 
+### 5. For running tests,python manage.py test
+
 ## Routes Documentation
 
 Below are the available routes along with their JSON bodies:
