@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import authentication_classes
 from rest_framework.authentication import TokenAuthentication
+from django.shortcuts import get_object_or_404
 
 
 @api_view(['POST'])
@@ -77,7 +78,7 @@ def create_note(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_note(request, id):
-    note = Note.objects.get(pk=id)
+    note = get_object_or_404(Note, pk=id)
     if request.user == note.owner or request.user in note.shared_with.all():
         serializer = NoteSerializer(note)
         return Response(serializer.data)
